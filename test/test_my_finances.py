@@ -2,8 +2,11 @@ import os
 from unittest import TestCase
 
 from my_finances.database_manage import DBcreator, Database
+from my_finances.ocr import ocr_itau
 
 BANCOTESTE = 'TestFinanceDB.db'
+BANK_SLIP_ITAU = 'TEST_BANK_SLIP/ocr_itau.jpg'
+BANK_SLIP_BBRASIL = 'TEST_BANK_SLIP/ocr_bbrasil.jpg'
 
 
 class TestDatabase(TestCase):
@@ -64,8 +67,19 @@ class TestOCR(TestCase):
     Teste de OCR dos boletos
     """
 
-    def setUp(self):
-        pass
-
     def test_1_ocr_itau(self):
-        pass
+        """
+        Teste de OCR em boleto gerado pelo banco Itau
+
+        Insira os valores dos boletos que serao testados nas variaveis
+        pagamento: valor pago,
+        codigo_boleto: codigo de barras,
+        data_pagamento: data em que foi realizado o pagamento
+        """
+
+        pagamento = float()       # Insira o valor pago
+        codigo_boleto = str()     # Insira o codigo de barras
+        data_pagamento = str('')  # Insira a data do pagamento
+
+        self.assertEqual(ocr_itau(BANK_SLIP_ITAU), (pagamento, codigo_boleto,
+                                                    data_pagamento))
