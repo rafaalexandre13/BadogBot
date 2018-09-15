@@ -2,7 +2,7 @@ import os
 from unittest import TestCase
 
 from my_finances.database_manage import DBcreator, Database
-from my_finances.ocr import ocr_itau
+from my_finances.ocr import ocr_itau, ocr_bbrasil
 
 BANCOTESTE = 'TestFinanceDB.db'
 BANK_SLIP_ITAU = 'TEST_BANK_SLIP/ocr_itau.jpg'
@@ -67,6 +67,15 @@ class TestOCR(TestCase):
     Teste de OCR dos boletos
     """
 
+    def setUp(self):
+        self.itauPay = float(421.57)       # Insira o valor pago
+        self.itauBarCode = str(23793381286000847992919000063305375770000042157)     # Insira o codigo de barras
+        self.itauPayDay = str('05/07/2018')    # Insira a data do pagamento
+
+        self.bbrasilPay = float(500.0)       # Insira o valor pago
+        self.bbrasilBarCode = str(23793381286000918494072000063304176080000050000)     # Insira o codigo de barras
+        self.bbrasilPayDay = str('06/08/2018')    # Insira a data do pagamento
+
     def test_1_ocr_itau(self):
         """
         Teste de OCR em boleto gerado pelo banco Itau
@@ -77,9 +86,15 @@ class TestOCR(TestCase):
         data_pagamento: data em que foi realizado o pagamento
         """
 
-        pagamento = float()       # Insira o valor pago
-        codigo_boleto = str()     # Insira o codigo de barras
-        data_pagamento = str('')  # Insira a data do pagamento
+        self.assertEqual(ocr_itau(BANK_SLIP_ITAU), (self.itauPay,
+                                                    self.itauBarCode,
+                                                    self.itauPayDay))
 
-        self.assertEqual(ocr_itau(BANK_SLIP_ITAU), (pagamento, codigo_boleto,
-                                                    data_pagamento))
+    def test_2_ocr_bbrasil(self):
+        """
+        Teste de OCR em boleto gerado pelo Banco do Brasil
+        """
+
+        self.assertEqual(ocr_bbrasil(BANK_SLIP_BBRASIL), (self.bbrasilPay,
+                                                          self.bbrasilBarCode,
+                                                          self.bbrasilPayDay))
