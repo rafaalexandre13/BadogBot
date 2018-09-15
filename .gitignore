@@ -3,8 +3,8 @@
 __pycache__
 .idea
 venv
-my_finances/BANK_SLIP/*
-test/TEST_BANK_SLIP/*
+my_finances/BankVoucher/*
+test/TestBankVoucher/*.jpg
 
 .env
 *.db
