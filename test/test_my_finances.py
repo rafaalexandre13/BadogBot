@@ -66,6 +66,7 @@ class TestOCR(TestCase):
     """
     Teste de OCR dos boletos
     """
+    # TODO Corrigir documentação
 
     def setUp(self):
         self.itauPay = float(421.57)       # Insira o valor pago
