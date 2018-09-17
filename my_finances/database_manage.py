@@ -17,10 +17,10 @@ class DBcreator:
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS deposito (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT,
-            pagamento REAL,
-            codigo_boleto TEXT UNIQUE,
-            data_pagamento TEXT
+            nome TEXT NOT NULL,
+            pagamento REAL NOT NULL,
+            codigo_boleto TEXT NOT NULL UNIQUE,
+            data_pagamento TEXT NOT NULL
         );
         """)
 
@@ -45,9 +45,18 @@ class Database:
 
         """
         database = DBcreator(dir_bd)
+        cursor = database.conn.cursor()
 
-        try:
+        cursor.execute("""
+        SELECT COUNT(*) AS bar_code_qt FROM deposito 
+        WHERE codigo_boleto = ?;
+        """, (self.codigo_boleto,))
+
+        check_barcode_repeated = cursor.fetchone()
+
+        if check_barcode_repeated[0] == 0:
             cursor = database.conn.cursor()
+
             cursor.execute("""
             INSERT INTO deposito (
                 nome, pagamento, codigo_boleto, data_pagamento)
@@ -57,18 +66,11 @@ class Database:
 
             database.conn.commit()
             cursor.close()
-            return "Sucesso"
+            return "success"
 
-        except sqlite3.IntegrityError:
-            return "Boleto ja existe"
-
-            # cursor.commit()
-            # situation = "#salvo"
-        # else:
-        #     situation = "#existe"
-        #
-        # self.connection.close()
-        # return situation
+        else:
+            cursor.close()
+            return "failed"
 
     def saida_valor_total(self, bd_dir):
         """
@@ -107,23 +109,3 @@ class Database:
         output = cursor.fetchall()
         cursor.close()
         return output
-
-#
-# def save_in_db(name, pay, bcode, date):
-#     db = Database(name, pay, bcode, date)
-#     insert = db.insert()
-#     return insert
-#
-# def valtotal(bd):
-#     db = Database()
-#     return db.saida_valor_total(bd)
-#
-# def valpeop(bd, name):
-#     db = Database(nome=name)
-#     return db.saida_valor_pessoal(bd, name)
-#
-# def val5movpeop(name):
-#     db = Database(name=name)
-#     return db.read3()
-#
-# save_in_db(1, 10.0, '1234567890', '31/08/18')

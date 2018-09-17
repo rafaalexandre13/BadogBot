@@ -19,7 +19,7 @@ def ocr_itau(img_dir):
 
     # OPTMIZACAO DA IMAGEM
     image = cv2.imread(img_dir)
-    crop = image[330:1000, 0:1000]
+    crop = image[100:270, 0:400]
     provides = 300.0 / crop.shape[1]
     resize = (300, int(crop.shape[0] * provides))
     final_image = cv2.resize(crop, resize, interpolation=cv2.INTER_AREA)
@@ -43,7 +43,7 @@ def ocr_itau(img_dir):
     codigo_boleto = captured_info[4].replace('.', '').replace(
         ' ', '') + captured_info[5].replace('.', '').replace(' ', '')
 
-    return pagamento, codigo_boleto, data_pagamento
+    return pagamento, data_pagamento, codigo_boleto
 
 
 def ocr_bbrasil(img_dir):
@@ -95,4 +95,4 @@ def ocr_bbrasil(img_dir):
     codigo_boleto = captured_info[0].replace(' ', '')
     data_pagamento = captured_info[2].split()[3]
 
-    return pagamento, codigo_boleto, data_pagamento
+    return pagamento, data_pagamento, codigo_boleto

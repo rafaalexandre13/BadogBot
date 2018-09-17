@@ -5,8 +5,8 @@ from my_finances.database_manage import DBcreator, Database
 from my_finances.ocr import ocr_itau, ocr_bbrasil
 
 BANCOTESTE = 'TestFinanceDB.db'
-BANK_SLIP_ITAU = 'TEST_BANK_SLIP/ocr_itau.jpg'
-BANK_SLIP_BBRASIL = 'TEST_BANK_SLIP/ocr_bbrasil.jpg'
+BANK_SLIP_ITAU = 'test_bank_voucher/test_ocr_itau.jpg'
+BANK_SLIP_BBRASIL = 'test_bank_voucher/test_ocr_bbrasil.jpg'
 
 
 class TestDatabase(TestCase):
@@ -27,7 +27,7 @@ class TestDatabase(TestCase):
         """
         Teste de insersao de valore no banco de dados
         """
-        self.assertEqual(self.database.insert(BANCOTESTE), "Sucesso")
+        self.assertEqual(self.database.insert(BANCOTESTE), "success")
 
     def test_3_inserir_valores_existente(self):
         """
@@ -35,7 +35,7 @@ class TestDatabase(TestCase):
         banco de dados
         """
         self.assertEqual(
-            self.database.insert(BANCOTESTE), "Boleto ja existe")
+            self.database.insert(BANCOTESTE), "failed")
 
     def test_4_valor_total(self):
         """
@@ -69,13 +69,13 @@ class TestOCR(TestCase):
     # TODO Corrigir documentação
 
     def setUp(self):
-        self.itauPay = float(421.57)       # Insira o valor pago
-        self.itauBarCode = str(23793381286000847992919000063305375770000042157)     # Insira o codigo de barras
-        self.itauPayDay = str('05/07/2018')    # Insira a data do pagamento
+        self.itauPay = 421.57
+        self.itauPayDay = "05/07/2018"
+        self.itauBarCode = "23793381286000847992919000063305375770000042157"
 
-        self.bbrasilPay = float(500.0)       # Insira o valor pago
-        self.bbrasilBarCode = str(23793381286000918494072000063304176080000050000)     # Insira o codigo de barras
-        self.bbrasilPayDay = str('06/08/2018')    # Insira a data do pagamento
+        self.bbrasilPay = 500.0
+        self.bbrasilPayDay = "06/08/2018"
+        self.bbrasilBarCode = "23793381286000918494072000063304176080000050000"
 
     def test_1_ocr_itau(self):
         """
@@ -88,8 +88,8 @@ class TestOCR(TestCase):
         """
 
         self.assertEqual(ocr_itau(BANK_SLIP_ITAU), (self.itauPay,
-                                                    self.itauBarCode,
-                                                    self.itauPayDay))
+                                                    self.itauPayDay,
+                                                    self.itauBarCode))
 
     def test_2_ocr_bbrasil(self):
         """
@@ -97,5 +97,5 @@ class TestOCR(TestCase):
         """
 
         self.assertEqual(ocr_bbrasil(BANK_SLIP_BBRASIL), (self.bbrasilPay,
-                                                          self.bbrasilBarCode,
-                                                          self.bbrasilPayDay))
+                                                          self.bbrasilPayDay,
+                                                          self.bbrasilBarCode))
