@@ -15,12 +15,12 @@ class DBcreator:
         cursor = self.conn.cursor()
 
         cursor.execute("""
-        CREATE TABLE IF NOT EXISTS deposito (
+        CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT NOT NULL,
-            pagamento REAL NOT NULL,
-            codigo_boleto TEXT NOT NULL UNIQUE,
-            data_pagamento TEXT NOT NULL
+            name TEXT NOT NULL,
+            transaction_value REAL NOT NULL,
+            barcode TEXT NOT NULL UNIQUE,
+            transaction_date TEXT NOT NULL
         );
         """)
 
@@ -30,27 +30,27 @@ class DBcreator:
 
 class Database:
 
-    def __init__(self, nome=str(), pagamento=float(),
-                 codigo_boleto=str(), data_pagamento=str()):
+    def __init__(self, name=str(), transaction_value=float(),
+                 barcode=str(), transaction_date=str()):
 
-        self.nome = nome
-        self.pagamento = pagamento
-        self.codigo_boleto = codigo_boleto
-        self.data_pagamento = data_pagamento
+        self.name = name
+        self.transaction_value = transaction_value
+        self.barcode = barcode
+        self.transaction_date = transaction_date
 
-    def insert(self, dir_bd):
+    def insert(self, db_directory):
         """
         INSERCAO DE DADOS
-        nome, pagamento, codigo de barras, data do pagamento
+        name, transaction_value, barcode, data do transaction_date
 
         """
-        database = DBcreator(dir_bd)
+        database = DBcreator(db_directory)
         cursor = database.conn.cursor()
 
         cursor.execute("""
-        SELECT COUNT(*) AS bar_code_qt FROM deposito 
-        WHERE codigo_boleto = ?;
-        """, (self.codigo_boleto,))
+        SELECT COUNT(*) AS bar_code_qt FROM transactions 
+            WHERE barcode = ?;
+        """, (self.barcode,))
 
         check_barcode_repeated = cursor.fetchone()
 
@@ -58,11 +58,11 @@ class Database:
             cursor = database.conn.cursor()
 
             cursor.execute("""
-            INSERT INTO deposito (
-                nome, pagamento, codigo_boleto, data_pagamento)
+            INSERT INTO transactions (
+                name, transaction_value, barcode, transaction_date)
                 VALUES (?, ?, ?, ?);
-            """, (self.nome, self.pagamento, self.codigo_boleto,
-                  self.data_pagamento))
+            """, (self.name, self.transaction_value, self.barcode,
+                  self.transaction_date))
 
             database.conn.commit()
             cursor.close()
@@ -72,39 +72,44 @@ class Database:
             cursor.close()
             return "failed"
 
-    def saida_valor_total(self, bd_dir):
+    def total_value(self, db_directory):
         """
         Mostrar o Valor total na conta
         """
-        database = DBcreator(bd_dir)
+        database = DBcreator(db_directory)
         cursor = database.conn.cursor()
-        cursor.execute("""SELECT SUM(pagamento) AS payments FROM deposito""")
+
+        cursor.execute(
+            """SELECT SUM(transaction_value) AS total_value FROM transactions"""
+        )
+
         output = cursor.fetchone()[0]
-        # output = "{:.2f}".format(output)
         cursor.close()
         return float(output)
 
-    def saida_valor_pessoal(self, dir_bd):
+    def personal_value(self, db_directory):
         """ VALOR TOTAL DE CADA PESSOA """
-        database = DBcreator(dir_bd)
+        database = DBcreator(db_directory)
         cursor = database.conn.cursor()
+
         cursor.execute("""
-        SELECT SUM(pagamento) AS payments FROM deposito
-            WHERE nome = ?;
-        """, (self.nome,))
+        SELECT SUM(transaction_value) AS personal_value FROM transactions
+            WHERE name = ?;
+        """, (self.name,))
+
         output = cursor.fetchone()[0]
-        # output = "{:.2f}".format(output)
         cursor.close()
         return float(output)
 
-    def ultimas_movimentacoes(self, dir_bd):
-        """ 5 ULTIMAS MOVIMENTACOES DE CADA PESSOA """
-        database = DBcreator(dir_bd)
+    def latest_transactions(self, db_directory):
+        """ 5 ULTIMAS TRANSACOES DE CADA PESSOA """
+        database = DBcreator(db_directory)
         cursor = database.conn.cursor()
+
         cursor.execute("""
-        SELECT nome, pagamento, data_pagamento FROM deposito WHERE nome = ?
-            ORDER BY id DESC LIMIT 5; 
-        """, (self.nome,))
+        SELECT name, transaction_value, transaction_date FROM transactions 
+            WHERE name = ? ORDER BY id DESC LIMIT 5; 
+        """, (self.name,))
 
         output = cursor.fetchall()
         cursor.close()
