@@ -8,7 +8,7 @@ db_directory = "my_finances/FinancesDB.db"
 class ButtonsInterface:
     @staticmethod
     def main_buttons():
-        # TODO Documentar
+        """ Conjunto de botões (Depositar, Extrato, Sair) """
 
         keyboard = [
             [IlKbButton("Depositar", callback_data="/deposit"),
@@ -21,11 +21,11 @@ class ButtonsInterface:
 
     @staticmethod
     def deposit_buttons():
-        # TODO Documentar
+        """ Conjunto de botões (Banco do Brasil, Itau, Voltar, Sair) """
 
         keyboard = [
             [IlKbButton("Banco do Brasil", callback_data="/bbrasil"),
-             IlKbButton("Itau", callback_data="/itau")],
+             IlKbButton("Itaú", callback_data="/itau")],
             [IlKbButton("Voltar", callback_data="/back"),
              IlKbButton("Sair", callback_data="/exit")]
         ]
@@ -37,7 +37,8 @@ class ButtonsInterface:
     def confirm_deposit_buttons(
             name, transaction_value, transaction_date, barcode
     ):
-        # TODO Documentar
+        """ Conjunto de botões (Continuar, Voltar, Sair) """
+
         db = Database(name, transaction_value, barcode, transaction_date)
 
         keyboard = [
@@ -51,7 +52,9 @@ class ButtonsInterface:
 
     @staticmethod
     def extract_buttons():
-        # TODO Documentar
+        """ Conjunto de botões (Valor total, Ultimas transações,
+        Voltar, Sair) """
+
         keyboard = [
             [IlKbButton("Valor total", callback_data="/total_value"),
              IlKbButton("Ultimas transações",

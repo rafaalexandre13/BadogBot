@@ -1,4 +1,3 @@
-# TODO Documentar
 from telegram import Bot
 from telegram import ParseMode
 from telegram.ext import CommandHandler
@@ -23,16 +22,15 @@ db_directory = "my_finances/FinancesDB.db"
 voucher_directory = "my_finances/bank_voucher/ocr_me.jpg"
 
 
-""" Variaveis para retorno de função"""
+# Variaveis para retorno de função
 START, MAIN, DEPOSIT, CONFIRM, EXTRACT = range(5)
 
 
 def start_interface(bot, update):
-    """
-    START
+    """ START
 
-    Primeira interface a ser chamado pela aplicacao
-    apresentara os botoes (Depositar, Extrato, Sair)
+    Primeira interface a ser chamado pela aplicação
+    Bot envia botões (Depositar, Extrato, Sair)
     """
     update.message.reply_text(
         "O que deseja?",
@@ -42,16 +40,15 @@ def start_interface(bot, update):
 
 
 def main_interface(bot, update):
-    # TODO Documentar
-    """
-    MAIN
+    """ MAIN
 
-    Encaminhamento da decisão dos botões Depositar, Extrato e Sair
+    Condições sobre a decisão dos botões da interface START
     """
     if update.callback_query.data == "/deposit":
-        # TODO Documentar
-        """
+        """ Se o botão escolhido for (Depositar)
+        
         Interface para escolha do Banco
+        Bot envia botões (Banco do Brasil, Itaú, Voltar, Sair)
         """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
@@ -62,9 +59,10 @@ def main_interface(bot, update):
         return DEPOSIT
 
     elif update.callback_query.data == "/extract":
-        # TODO Documentar
-        """
-        Interface extrato
+        """ Se o botão escolhido for (Extrato)
+        
+        Interface para escolha de tipo do Extrato
+        Bot envia botões (Valor total, Ultimas transações, Voltar, Sair)
         """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
@@ -75,9 +73,9 @@ def main_interface(bot, update):
         return EXTRACT
 
     elif update.callback_query.data == "/exit":
-        # TODO Documentar
-        """
-        Sair
+        """ Se o botão escolhido for (Sair)
+        
+        Encerrar a aplicação
         """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
@@ -87,20 +85,31 @@ def main_interface(bot, update):
 
 
 def deposit(bot, update):
-    # TODO Documentar
-    """
-    DEPOSIT
+    """ DEPOSIT
 
+    Condições sobre a decisão dos botões da interface MAIN
     """
     if update.callback_query.data == '/bbrasil':
+        """ Se o botão escolhido for (Banco do Brasil)
+            
+        Usuário deve enviar o comprovante da transação Emitido pelo
+        Banco do Brasil
+        """
         def bbrasil(bot, update):
-            # TODO Documentar
-            """Banco do Brasil"""
+            """ Confirmação Banco do Brasil
+
+            Bot envia informações com os dados coletados do comprovante e
+            botões (Continuar, Voltar, Cancelar)
+            """
+
+            # Coletando username do telegram
             username = update.message.chat.username
 
+            # Capturando o comprovante enviado pelo usuário
             image = bot.getFile(update.message.photo[-1].file_id)
             image.download(voucher_directory)
 
+            # OCR do comprovante do Banco do Brasil
             voucher = ocr.ocr_bbrasil(voucher_directory)
 
             bot.send_message(
@@ -128,15 +137,26 @@ def deposit(bot, update):
         dispatcher.add_handler(voucher_handler)
 
     elif update.callback_query.data == "/itau":
-        # TODO Documentar
-        """ Itau """
+        """ Se o botão escolhido for (Itaú)
+            
+        Usuário deve enviar o comprovante da transação Emitido pelo
+        Itau 
+        """
         def itau(bot, update):
-            # TODO Documentar
+            """ Confirmação Itau
+
+            Bot envia informações com os dados coletados do comprovante e
+            botões (Continuar, Voltar, Cancelar)
+            """
+
+            # Coletando username do telegram
             username = update.message.chat.username
 
+            # Capturando o comprovante enviado pelo usuário
             image = bot.getFile(update.message.photo[-1].file_id)
             image.download(voucher_directory)
 
+            # OCR do comprovante do Banco Itau
             voucher = ocr.ocr_itau(voucher_directory)
 
             bot.send_message(
@@ -146,12 +166,11 @@ def deposit(bot, update):
                 parse_mode=ParseMode.MARKDOWN
             )
 
-            confirm = ButtonsInterface.confirm_deposit_buttons(
-                username, voucher[0], voucher[1], voucher[2])
-
             update.message.reply_text(
                 "Confirme as informações",
-                reply_markup=confirm)
+                reply_markup=ButtonsInterface.confirm_deposit_buttons(
+                    username, voucher[0], voucher[1], voucher[2]
+                ))
 
             dispatcher.remove_handler(voucher_handler)
 
@@ -165,7 +184,11 @@ def deposit(bot, update):
         dispatcher.add_handler(voucher_handler)
 
     elif update.callback_query.data == "/back":
-        # TODO Documentar
+        """ Se o botão escolhido for (Voltar)
+        
+        Volta para a interface START
+        Bot envia botões (Depositar, Extrato, Sair)
+        """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
@@ -175,7 +198,10 @@ def deposit(bot, update):
         return MAIN
 
     elif update.callback_query.data == "/exit":
-        # TODO Documentar
+        """Se o botão escolhido for (Sair)
+        
+        Encerrar a aplicação
+        """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
@@ -187,13 +213,16 @@ def deposit(bot, update):
 
 
 def confirm_information(bot, update):
-    # TODO Documentar
-    """
-    CONFIRM
+    """ CONFIRM
 
+    Condições sobre a decisão dos botões da interface DEPOSIT
     """
     if update.callback_query.data == "success":
-        # TODO Documentar
+        """Se o botão escolhido for (Continuar) e o database retornar (success) 
+        os dados do comprovante serão salvos
+        
+        Bot envia mensagem de status da operação
+        """
         # TODO Fazer voltar ao menu princial
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
@@ -202,7 +231,12 @@ def confirm_information(bot, update):
         )
 
     elif update.callback_query.data == "failed":
-        # TODO Documentar
+        """ Se o botão escolhido for (Continuar) e o database retornar (failed) 
+        os dados do comprovante não serão salvos por já existir algum 
+        comprovante com o mesmo código de barras
+        
+        Bot envia mensagem de status da operação
+        """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
@@ -211,9 +245,12 @@ def confirm_information(bot, update):
         )
         return DEPOSIT
 
-
     elif update.callback_query.data == "/back":
-        # TODO Documentar
+        """ Se o botão escolhido for (Voltar)
+        
+        Volta para a interface DEPOSIT
+        Bot envia botões (Banco do Brasil, Itaú, Voltar, Sair)
+        """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
@@ -223,7 +260,10 @@ def confirm_information(bot, update):
         return DEPOSIT
 
     elif update.callback_query.data == "/cancel":
-        # TODO Documentar
+        """ Se o botão escolhido for (Sair)
+        
+        Encerrar a aplicação
+        """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
@@ -232,12 +272,16 @@ def confirm_information(bot, update):
 
 
 def extract(bot, update):
-    # TODO Documentar
-    """
-    EXTRACT
+    """ EXTRACT
 
+    Condições sobre a decisão dos botões da interface MAIN
     """
     if update.callback_query.data == "/total_value":
+        """ Se o botão escolhido for (Valor total)
+        
+        Bot envia o valor total e os botões 
+        (Valor total, Ultimas transações, Voltar, Sair)
+        """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
@@ -248,17 +292,26 @@ def extract(bot, update):
         return EXTRACT
 
     elif update.callback_query.data == "/last_transactions":
-        # TODO Documentar
+        """Se o botão escolhido for (Ultimas transações)
+        
+        Bot envia as ultimas transações e os botões
+        (Valor total, Ultimas transações, Voltar, Sair)
+        """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
-            text=message_last_transactions(database.latest_transactions(db_directory)),
+            text=message_last_transactions(
+                database.latest_transactions(db_directory)),
             reply_markup=ButtonsInterface.extract_buttons()
         )
         return EXTRACT
 
     elif update.callback_query.data == "/back":
-        # TODO Documentar
+        """ Se o botão escolhido for (Voltar)
+        
+        Volta para a interface MAIN
+        Bot envia botões (Depositar, Extrato, Sair)
+        """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
@@ -268,7 +321,10 @@ def extract(bot, update):
         return MAIN
 
     elif update.callback_query.data == "/exit":
-        # TODO Documentar
+        """Se o botão escolhido for (Sair)
+        
+        Encerrar a aplicação
+        """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
@@ -276,7 +332,7 @@ def extract(bot, update):
         )
 
 
-# TODO Documentar
+# Variavel a ser chamada para inicialização da aplicação my_finance
 manage_finances = ConvHand(
     [CommandHandler('finance', start_interface)],
     {
