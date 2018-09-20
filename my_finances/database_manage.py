@@ -72,16 +72,17 @@ class Database:
             cursor.close()
             return "failed"
 
-    def total_value(self, db_directory):
+    @staticmethod
+    def total_value(db_directory):
         """
         Mostrar o Valor total na conta
         """
         database = DBcreator(db_directory)
         cursor = database.conn.cursor()
 
-        cursor.execute(
-            """SELECT SUM(transaction_value) AS total_value FROM transactions"""
-        )
+        cursor.execute("""
+        SELECT SUM(transaction_value) AS total_value FROM transactions;
+        """)
 
         output = cursor.fetchone()[0]
         cursor.close()
@@ -101,15 +102,16 @@ class Database:
         cursor.close()
         return float(output)
 
-    def latest_transactions(self, db_directory):
+    @staticmethod
+    def latest_transactions(db_directory):
         """ 5 ULTIMAS TRANSACOES DE CADA PESSOA """
         database = DBcreator(db_directory)
         cursor = database.conn.cursor()
 
         cursor.execute("""
         SELECT name, transaction_value, transaction_date FROM transactions 
-            WHERE name = ? ORDER BY id DESC LIMIT 5; 
-        """, (self.name,))
+            ORDER BY id DESC LIMIT 5;
+        """)
 
         output = cursor.fetchall()
         cursor.close()

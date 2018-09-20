@@ -2,7 +2,7 @@ from telegram import InlineKeyboardButton as IlKbButton
 from telegram import InlineKeyboardMarkup
 from ..database_manage import Database
 
-db_direrctory = "my_finances/FinancesDB.db_create"
+db_directory = "my_finances/FinancesDB.db"
 
 
 class ButtonsInterface:
@@ -13,7 +13,7 @@ class ButtonsInterface:
         keyboard = [
             [IlKbButton("Depositar", callback_data="/deposit"),
              IlKbButton("Extrato", callback_data="/extract")],
-            [IlKbButton("Cancelar", callback_data="/cancel")]
+            [IlKbButton("Sair", callback_data="/exit")]
         ]
 
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -27,7 +27,7 @@ class ButtonsInterface:
             [IlKbButton("Banco do Brasil", callback_data="/bbrasil"),
              IlKbButton("Itau", callback_data="/itau")],
             [IlKbButton("Voltar", callback_data="/back"),
-             IlKbButton("Cancelar", callback_data="/cancel")]
+             IlKbButton("Sair", callback_data="/exit")]
         ]
 
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -41,7 +41,7 @@ class ButtonsInterface:
         db = Database(name, transaction_value, barcode, transaction_date)
 
         keyboard = [
-            [IlKbButton("Continuar", callback_data=db.insert(db_direrctory))],
+            [IlKbButton("Continuar", callback_data=db.insert(db_directory))],
             [IlKbButton("Voltar", callback_data="/back"),
              IlKbButton("Cancelar", callback_data="/cancel")]
         ]
@@ -57,7 +57,7 @@ class ButtonsInterface:
              IlKbButton("Ultimas transações",
                         callback_data="/last_transactions")],
             [IlKbButton("Voltar", callback_data="/back"),
-             IlKbButton("Cancelar", callback_data="/cancel")]
+             IlKbButton("Sair", callback_data="/exit")]
         ]
 
         reply_markup = InlineKeyboardMarkup(keyboard)

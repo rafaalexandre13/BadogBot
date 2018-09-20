@@ -11,6 +11,7 @@ from decouple import config
 from my_finances import ocr
 from my_finances.database_manage import Database
 from .inlines_buttons import ButtonsInterface
+from .bot_menssages import *
 
 TOKEN = config('TOKEN')
 bot = Bot(TOKEN)
@@ -18,14 +19,11 @@ updater = Updater(TOKEN)
 dispatcher = updater.dispatcher
 
 database = Database()
-db_directory = "my_finances/FinancesDB.db_create"
+db_directory = "my_finances/FinancesDB.db"
 voucher_directory = "my_finances/bank_voucher/ocr_me.jpg"
 
-confirmation_message = "Valor depositado: R$ `{}`\n" \
-                       "Data: `{}`\n" \
-                       "Código de barras:\n`{}`"
 
-# TODO Documentar
+""" Variaveis para retorno de função"""
 START, MAIN, DEPOSIT, CONFIRM, EXTRACT = range(5)
 
 
@@ -34,7 +32,7 @@ def start_interface(bot, update):
     START
 
     Primeira interface a ser chamado pela aplicacao
-    apresentara os botoes (Depositar, Extrato, Cancelar)
+    apresentara os botoes (Depositar, Extrato, Sair)
     """
     update.message.reply_text(
         "O que deseja?",
@@ -48,6 +46,7 @@ def main_interface(bot, update):
     """
     MAIN
 
+    Encaminhamento da decisão dos botões Depositar, Extrato e Sair
     """
     if update.callback_query.data == "/deposit":
         # TODO Documentar
@@ -75,10 +74,10 @@ def main_interface(bot, update):
         )
         return EXTRACT
 
-    elif update.callback_query.data == "/cancel":
+    elif update.callback_query.data == "/exit":
         # TODO Documentar
         """
-        Cancelar
+        Sair
         """
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
@@ -111,12 +110,11 @@ def deposit(bot, update):
                 parse_mode=ParseMode.MARKDOWN
             )
 
-            confirm = ButtonsInterface.confirm_deposit_buttons(
-                username, voucher[0], voucher[1], voucher[2])
-
             update.message.reply_text(
                 "Confirme as informações",
-                reply_markup=confirm)
+                reply_markup=ButtonsInterface.confirm_deposit_buttons(
+                    username, voucher[0], voucher[1], voucher[2]
+                ))
 
             dispatcher.remove_handler(voucher_handler)
 
@@ -176,7 +174,7 @@ def deposit(bot, update):
         )
         return MAIN
 
-    elif update.callback_query.data == "cancel":
+    elif update.callback_query.data == "/exit":
         # TODO Documentar
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
@@ -196,6 +194,7 @@ def confirm_information(bot, update):
     """
     if update.callback_query.data == "success":
         # TODO Documentar
+        # TODO Fazer voltar ao menu princial
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
@@ -207,8 +206,11 @@ def confirm_information(bot, update):
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
-            text="Já existe um comprovante com esse código de barras."
+            text="Já existe um comprovante com esse código de barras.",
+            reply_markup=ButtonsInterface.deposit_buttons()
         )
+        return DEPOSIT
+
 
     elif update.callback_query.data == "/back":
         # TODO Documentar
@@ -218,7 +220,7 @@ def confirm_information(bot, update):
             text="Escolha o Banco em que foi gerado o comprovante",
             reply_markup=ButtonsInterface.deposit_buttons()
         )
-        return MAIN
+        return DEPOSIT
 
     elif update.callback_query.data == "/cancel":
         # TODO Documentar
@@ -239,18 +241,21 @@ def extract(bot, update):
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
-            text="Valor total: R${:.2f}".format(
-                database.total_value(db_directory)
-            )
+            text="Valor total: R${:.2f}\n".format(
+                    database.total_value(db_directory)),
+            reply_markup=ButtonsInterface.extract_buttons()
         )
+        return EXTRACT
 
     elif update.callback_query.data == "/last_transactions":
         # TODO Documentar
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
             message_id=update.callback_query.message.message_id,
-            text="Aguardando..."
+            text=message_last_transactions(database.latest_transactions(db_directory)),
+            reply_markup=ButtonsInterface.extract_buttons()
         )
+        return EXTRACT
 
     elif update.callback_query.data == "/back":
         # TODO Documentar
@@ -260,8 +265,9 @@ def extract(bot, update):
             text="O que deseja?",
             reply_markup=ButtonsInterface.main_buttons()
         )
+        return MAIN
 
-    elif update.callback_query.data == "/cancel":
+    elif update.callback_query.data == "/exit":
         # TODO Documentar
         bot.edit_message_text(
             chat_id=update.callback_query.message.chat_id,
